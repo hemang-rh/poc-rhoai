@@ -2,13 +2,15 @@ apiVersion: kubeflow.org/v1
 kind: Notebook
 metadata:
   annotations:
+    notebooks.kubeflow.org/last-activity: "2026-05-19T19:55:49Z"
+    notebooks.kubeflow.org/last_activity_check_timestamp: "2026-05-19T19:55:49Z"
     notebooks.opendatahub.io/inject-auth: "true"
     notebooks.opendatahub.io/last-image-selection: s2i-minimal-notebook:3.4
     notebooks.opendatahub.io/last-image-version-git-commit-selection: d3137ca
     opendatahub.io/connections: ""
-    opendatahub.io/hardware-profile-name: nvidia-gpu-100
+    opendatahub.io/hardware-profile-name: profile-nvidia-gpu-full
     opendatahub.io/hardware-profile-namespace: redhat-ods-applications
-    opendatahub.io/hardware-profile-resource-version: "790621"
+    opendatahub.io/hardware-profile-resource-version: "1181886"
     opendatahub.io/image-display-name: Jupyter | Minimal | CPU | Python 3.12
     opendatahub.io/user: admin
     opendatahub.io/username: admin
@@ -20,7 +22,7 @@ metadata:
     opendatahub.io/dashboard: "true"
     opendatahub.io/odh-managed: "true"
   name: wb-gpu
-  namespace: rhoai-nonadmin-project
+  namespace: project-workbench-test
 spec:
   template:
     spec:
@@ -31,7 +33,7 @@ spec:
             --ServerApp.port=8888
                               --ServerApp.token=''
                               --ServerApp.password=''
-                              --ServerApp.base_url=/notebook/rhoai-nonadmin-project/wb-gpu
+                              --ServerApp.base_url=/notebook/project-workbench-test/wb-gpu
                               --ServerApp.quit_button=False
         - name: JUPYTER_IMAGE
           value: image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-minimal-notebook:3.4
@@ -52,7 +54,7 @@ spec:
         livenessProbe:
           failureThreshold: 3
           httpGet:
-            path: /notebook/rhoai-nonadmin-project/wb-gpu/api
+            path: /notebook/project-workbench-test/wb-gpu/api
             port: notebook-port
             scheme: HTTP
           initialDelaySeconds: 10
@@ -67,7 +69,7 @@ spec:
         readinessProbe:
           failureThreshold: 3
           httpGet:
-            path: /notebook/rhoai-nonadmin-project/wb-gpu/api
+            path: /notebook/project-workbench-test/wb-gpu/api
             port: notebook-port
             scheme: HTTP
           initialDelaySeconds: 10
@@ -77,11 +79,11 @@ spec:
         resources:
           limits:
             cpu: "2"
-            memory: 4Gi
+            memory: 2Gi
             nvidia.com/gpu: "1"
           requests:
             cpu: "2"
-            memory: 4Gi
+            memory: 2Gi
             nvidia.com/gpu: "1"
         volumeMounts:
         - mountPath: /opt/app-root/src/
@@ -146,8 +148,6 @@ spec:
         - mountPath: /etc/tls/private
           name: kube-rbac-proxy-tls-certificates
       enableServiceLinks: false
-      nodeSelector:
-        node.kubernetes.io/instance-type: g6.12xlarge
       serviceAccountName: wb-gpu
       tolerations:
       - effect: NoSchedule

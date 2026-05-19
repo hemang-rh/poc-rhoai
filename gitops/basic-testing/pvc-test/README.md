@@ -17,7 +17,6 @@ README.md
 ## Before you run it
 
 - Make sure you are logged in with `oc login`.
-- Update `storageClassName` in `pvc.yaml` to the storage class you want to test.
 - If your cluster is disconnected, replace the test image in `pod.yaml` with one available in your internal registry.
 
 ## Run the test

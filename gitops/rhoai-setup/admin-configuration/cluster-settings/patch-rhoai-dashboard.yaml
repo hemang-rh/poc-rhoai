@@ -7,7 +7,4 @@ spec:
     notebookController:
       enabled: true
       notebookNamespace: rhods-notebooks
-      notebookTolerationSettings:
-        enabled: false
-        key: NotebooksOnly
-      pvcSize: 30Gi
+      pvcSize: 20Gi
