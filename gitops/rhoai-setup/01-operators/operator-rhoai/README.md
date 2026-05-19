@@ -18,25 +18,6 @@ Red Hat OpenShift AI (RHOAI) is an enterprise AI/ML platform that provides:
 
 RHOAI 3.x is currently deployed using the **`stable-3.x`** subscription channel.
 
-The subscription channel is configured in `kustomization.yaml` and can be easily updated:
-
-```yaml
-patches:
-  - target:
-      kind: Subscription
-      name: rhods-operator
-    patch: |-
-      - op: replace
-        path: /spec/channel
-        value: fast-3.x  # Change this value as needed
-```
-
-**Available channels:**
-
-- `fast-3.x` - Early access to RHOAI 3.x (current)
-- `stable-3.x` - Production-ready releases (use after 3.2 release)
-- `fast-3.x` - Latest features across all versions
-
 ### Required Dependencies
 
 RHOAI 3.x requires the following operators to be installed **before** the RHOAI operator:
@@ -67,8 +48,9 @@ For enhanced GPU support and monitoring:
 oc apply -k gitops/rhoai-setup/operators/operator-nfd
 
 # Wait for operators to be ready (2-3 minutes)
-oc wait --for=condition=Ready pod -l app=nfd-master \
-  -n openshift-nfd --timeout=300s
+oc -n openshift-nfd wait pod --all \
+  --for=condition=Ready \
+  --timeout=300s
 ```
 
 ```bash
@@ -85,6 +67,11 @@ oc wait --for condition=established --timeout=60s \
 
 # Now apply the ClusterPolicy
 oc apply -f gitops/rhoai-setup/operators/operator-nvidia-gpu/clusterpolicy.yaml
+
+# Wait for
+oc wait --for=condition=Ready pod -l app=nvidia-operator-validator \
+  -n nvidia-gpu-operator --timeout=300s
+
 ```
 
 #### Step 2: Install RHOAI Operator
@@ -185,6 +172,19 @@ Available states:
 
 - `Managed` - Component is deployed and managed
 - `Removed` - Component is not deployed
+
+## Configuring Operator Logger
+
+You can change the log level for OpenShift AI Operator components by setting the .spec.devFlags.logmode flag for the DSC Initialization/DSCI custom resource during runtime. If you do not set a logmode value, the logger uses the INFO log level by default.
+
+Available log levels:
+
+- `devel` or `development` (Stacktrace level = WARN, Verbosity = INFO, Output = Console)
+- `prod` or `production` (Stacktrace level = ERROR, Verbosity = INFO, Output = JSON)
+
+```bash
+oc patch dsci default-dsci -p '{"spec":{"devFlags":{"logmode":"development"}}}' --type=merge
+```
 
 ## Accessing RHOAI Dashboard
 

@@ -1,0 +1,7 @@
+apiVersion: dscinitialization.opendatahub.io/v1
+kind: DSCInitialization
+metadata:
+  name: default-dsci
+spec:
+  devFlags:
+    logmode: development # Set logmode to 'production' for reduced logging in production environments

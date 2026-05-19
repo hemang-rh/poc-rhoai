@@ -1,0 +1,7 @@
+apiVersion: project.openshift.io/v1
+kind: Project
+metadata:
+  name: rhoai-nonadmin-project
+  annotations:
+    openshift.io/display-name: "RHOAI Non Admin Project"
+    openshift.io/description: "Project for validating non-admin OpenShift AI access"

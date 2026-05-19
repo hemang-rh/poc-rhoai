@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: rhods-nonadmins-view
+  namespace: rhoai-nonadmin-project
+subjects:
+  - kind: Group
+    apiGroup: rbac.authorization.k8s.io
+    name: rhods-nonadmins
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view

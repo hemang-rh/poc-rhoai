@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pvc-test-pod
+  labels:
+    app: pvc-test-pod
+spec:
+  restartPolicy: Always
+  containers:
+    - name: test-container
+      image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+      command:
+        - /bin/sh
+        - -c
+        - |
+          mkdir -p /mnt/testdata
+          echo "container started" >> /mnt/testdata/startup.log
+          sleep 365d
+      volumeMounts:
+        - name: test-storage
+          mountPath: /mnt/testdata
+  volumes:
+    - name: test-storage
+      persistentVolumeClaim:
+        claimName: test-pvc

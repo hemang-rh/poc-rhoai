@@ -1,0 +1,39 @@
+apiVersion: infrastructure.opendatahub.io/v1
+kind: HardwareProfile
+metadata:
+  annotations:
+    opendatahub.io/dashboard-feature-visibility: '[]'
+    opendatahub.io/disabled: 'false'
+    opendatahub.io/display-name: NVIDIA GPU - 100%
+  name: nvidia-gpu-100
+  namespace: redhat-ods-applications
+spec:
+  identifiers:
+    - defaultCount: '2'
+      displayName: CPU
+      identifier: cpu
+      maxCount: '16'
+      minCount: '2'
+      resourceType: CPU
+    - defaultCount: 4Gi
+      displayName: Memory
+      identifier: memory
+      maxCount: 42Gi
+      minCount: 2Gi
+      resourceType: Memory
+    - defaultCount: 1
+      displayName: GPU
+      identifier: nvidia.com/gpu
+      maxCount: 4
+      minCount: 1
+      resourceType: Accelerator
+  scheduling:
+    node:
+      nodeSelector:
+        node.kubernetes.io/instance-type: g6.12xlarge
+      tolerations:
+        - effect: NoSchedule
+          key: nvidia.com/gpu
+          operator: Equal
+          value: '100'
+    type: Node

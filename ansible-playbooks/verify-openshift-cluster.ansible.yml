@@ -210,6 +210,21 @@
       register: gpu_alloc_count
       changed_when: false
 
+    - name: Compute total allocatable GPUs across all nodes
+      shell: |
+        oc get nodes -o json | jq '
+          [.items[]
+            | ((.status.allocatable["nvidia.com/gpu"]? // "0") | tostring | tonumber)
+          ]
+          | (add // 0)
+        '
+      register: gpu_total_alloc
+      changed_when: false
+
+    - name: Total GPU nodes summary (informational)
+      debug:
+        msg: "GPU node counts - role label: {{ gpu_role_count.stdout }}, NFD label: {{ gpu_nfd_count.stdout }}, allocatable > 0: {{ gpu_alloc_count.stdout }}, total allocatable GPUs: {{ gpu_total_alloc.stdout | default('0') }}"
+
     - name: Compute GPU presence
       set_fact:
         gpu_present: >-
@@ -220,7 +235,7 @@
         that:
           - gpu_present | bool
         fail_msg: "No GPU nodes detected by role label, NFD label, or allocatable resource."
-        success_msg: "GPU detected (role: {{ gpu_role_count.stdout }}, NFD: {{ gpu_nfd_count.stdout }}, alloc: {{ gpu_alloc_count.stdout }})."
+        success_msg: "GPU detected (role: {{ gpu_role_count.stdout }}, NFD: {{ gpu_nfd_count.stdout }}, alloc nodes: {{ gpu_alloc_count.stdout }}, total allocatable GPUs: {{ gpu_total_alloc.stdout | default('0') }})."
       ignore_errors: true
 
     - name: Find unschedulable (cordoned) nodes
@@ -326,8 +341,9 @@
               GPU detected: {{ ( (gpu_nfd_count.stdout | int) > 0 or (gpu_alloc_count.stdout | int) > 0 ) | ternary('yes', 'no') }}
                 - via role labels: {{ gpu_role_count.stdout | default('0') }}
                 - via NFD:        {{ gpu_nfd_count.stdout | default('0') }}
-                - via alloc:      {{ gpu_alloc_count.stdout | default('0') }}
-                - GPU nodes (alloc>0): {{ gpu_node_names.stdout_lines | default([]) | join(', ') }}
+                - via alloc nodes: {{ gpu_alloc_count.stdout | default('0') }}
+                - total allocatable GPUs: {{ gpu_total_alloc.stdout | default('0') }}
+                - GPU node names (alloc>0): {{ gpu_node_names.stdout_lines | default([]) | join(', ') }}
               {% if gpu_label_warning | default(false) %}
               WARNING: GPU role labels are 0 but GPUs are detected via NFD/alloc. This is acceptable; ensure tolerations if taints are present.
               {% endif %}
@@ -391,7 +407,9 @@
               Timestamp: {{ report_time }}
               ## Summary
               - CPU workers: {{ cpu_worker_count.stdout | default('N/A') }}
-              - GPU nodes (alloc>0): {{ gpu_node_names.stdout_lines | default([]) | join(', ') }}
+              - GPU nodes (alloc>0): {{ gpu_nfd_count.stdout | default('0') }}
+              - Total allocatable GPUs: {{ gpu_total_alloc.stdout | default('0') }}
+              - GPU node names (alloc>0): {{ gpu_node_names.stdout_lines | default([]) | join(', ') }}
               - Nodes schedulable: {{ (pass_schedulable | bool) | ternary('yes','no') }}
               - Cluster version: {{ ocp_version_cmd.stdout | default('N/A') }}
 
@@ -399,7 +417,6 @@
               | Step | Coverage | Result |
               |------|----------|--------|
               | CPU worker node | At least 1 non-GPU worker | {{ (pass_cpu_worker | bool) | ternary('PASS','FAIL') }} |
-              | Web Terminal operator | CSV Succeeded in openshift-operators | {{ (pass_web_terminal | bool) | ternary('PASS','FAIL') }} |
               | OpenShift version | >= {{ min_ocp_version | default('N/A') }} | {{ ( (min_ocp_version | length > 0) | ternary((pass_version | bool) | ternary('PASS','FAIL'),'N/A') ) }} |
               | Default StorageClass | Default StorageClass present | {{ ( (require_default_sc | bool) | ternary((pass_default_sc | bool) | ternary('PASS','FAIL'),'N/A') ) }} |
               | Ingress health | Default Ingress Available + console route admitted | {{ ( (check_ingress | bool) | ternary((pass_ingress | bool) | ternary('PASS','FAIL'),'N/A') ) }} |

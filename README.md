@@ -8,15 +8,30 @@ This repository provides **automated setup and configuration tools for deploying
 
 Before using this repository, ensure you have the following:
 
-### 1. OpenShift Cluster
+- **Cluster running OpenShift 4.19+** with cluster-admin access
+- **`oc` CLI** installed and configured
+- **GPU node(s)** (optional, for model serving and training)
+- `ansible-playbook` installed
+- `jq` installed
 
-- **Standard Clusters:** A minimum of 2 worker nodes is required, with at least 8 CPUs and 32 GiB of RAM each.
-- **Single-node Clusters:** The node must have at least 32 CPUs and 128 GiB of RAM.
+**Prerequisites Check:**
 
-- You must have access to a running OpenShift cluster
-- You must have access to the cluster as a user with `cluster-admin` role.
+```bash
+# Verify OpenShift version (4.19+ required)
+oc version
 
-### 2. Ansible and ansible-playbook
+# Verify cluster-admin access
+oc whoami
+oc auth can-i create namespace
+
+# Verify ansible-playbook is installed
+ansible-playbook --version
+
+# Verify jq is installed
+jq --version
+```
+
+### How to install ansible playbook
 
 - For macOS:
 
@@ -59,7 +74,7 @@ Before using this repository, ensure you have the following:
   ansible-playbook --version
   ```
 
-### 3. OpenShift CLI (`oc`)
+### How to install OpenShift CLI (`oc`)
 
 - Install the OpenShift CLI
   - [Official documentation](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/cli_tools/openshift-cli-oc#cli-getting-started).

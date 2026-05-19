@@ -31,7 +31,7 @@ spec:
     kueue:
       defaultClusterQueueName: default
       defaultLocalQueueName: default
-      managementState: Unmanaged  # The RH Kueue Operator manages the instance
+      managementState: Removed  # The RH Kueue Operator manages the instance
     workbenches:
       managementState: Managed
       workbenchNamespace: rhods-notebooks
@@ -42,4 +42,4 @@ spec:
     trainingoperator:
       managementState: Managed
     trainer:
-      managementState: Managed
+      managementState: Removed
