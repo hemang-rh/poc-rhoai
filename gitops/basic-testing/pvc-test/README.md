@@ -42,24 +42,6 @@ oc get pod -n pvc-test
 oc get pod pvc-test-pod -n pvc-test -o wide
 ```
 
-Write a file into the mounted path:
-
-```bash
-oc exec -n pvc-test pvc-test-pod -- /bin/sh -c 'echo "OpenShift PVC test successful" > /mnt/testdata/hello.txt && sync'
-```
-
-Read it back:
-
-```bash
-oc exec -n pvc-test pvc-test-pod -- /bin/sh -c 'cat /mnt/testdata/hello.txt'
-```
-
-Expected output:
-
-```text
-OpenShift PVC test successful
-```
-
 ## Interpret the result
 
 - PVC `Bound` + pod `Running` + successful file write/read means the storage class is usable for basic PVC-backed workloads.
@@ -69,5 +51,5 @@ OpenShift PVC test successful
 ## Clean up
 
 ```bash
-oc delete -k .
+oc delete -k gitops/basic-testing/pvc-test
 ```
