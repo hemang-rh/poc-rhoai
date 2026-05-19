@@ -44,7 +44,7 @@ oc get pod pvc-test-pod -n pvc-test -o wide
 
 ## Interpret the result
 
-- PVC `Bound` + pod `Running` + successful file write/read means the storage class is usable for basic PVC-backed workloads.
+- PVC `Bound` + pod `Running` means the storage class is usable for basic PVC-backed workloads.
 - PVC `Pending` means no suitable PV was found or provisioned for the claim.
 - Pod `Pending` after PVC bind usually points to scheduling, node affinity, or image issues.
 
