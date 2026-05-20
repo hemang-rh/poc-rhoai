@@ -8,9 +8,11 @@ metadata:
   labels:
     operators.coreos.com/gpu-operator-certified.nvidia-gpu-operator: ''
 spec:
+  #TODO add in README.md that might have to be updated based on what channels are avaiable.
   channel: v25.3
   installPlanApproval: Automatic
   name: gpu-operator-certified
   source: certified-operators
   sourceNamespace: openshift-marketplace
-  startingCSV: gpu-operator-certified.v25.3.4
+  #TODO verify if this needs to be hardcoded or can we leave it blank
+  startingCSV: gpu-operator-certified.v25.3.4 

@@ -5,7 +5,8 @@ metadata:
   namespace: openshift-nfd
 spec:
   operand:
-    image: registry.redhat.io/openshift4/ose-node-feature-discovery-rhel9:v4.20
+    #TODO client might have to update this with SHA value of the image as opposed to the version.
+    image: registry.redhat.io/openshift4/ose-node-feature-discovery-rhel9:v4.20 
     servicePort: 12000
   workerConfig:
     configData: |
