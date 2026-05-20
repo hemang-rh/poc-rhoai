@@ -45,7 +45,7 @@ For enhanced GPU support and monitoring:
 
 ```bash
 # Deploy NFD operator
-oc apply -k gitops/rhoai-setup/operators/operator-nfd
+until oc apply -k gitops/rhoai-setup/operators/operator-nfd; do : ; done
 
 # Wait for operators to be ready (2-3 minutes)
 oc -n openshift-nfd wait pod --all \
@@ -55,7 +55,7 @@ oc -n openshift-nfd wait pod --all \
 
 ```bash
 # Deploy NVIDIA GPU operator
-oc apply -k gitops/rhoai-setup/operators/operator-nvidia-gpu --prune=false
+until oc apply -k gitops/rhoai-setup/operators/operator-nvidia-gpu; do : ; done
 
 # Wait for the operator to be ready (this can take 1-2 minutes)
 oc wait --for=condition=available --timeout=300s \
@@ -78,7 +78,7 @@ oc wait --for=condition=Ready pod -l app=nvidia-operator-validator \
 
 ```bash
 # Install the operator subscription
-oc apply -k gitops/rhoai-setup/operators/operator-rhoai
+until oc apply -k gitops/rhoai-setup/operators/operator-rhoai; do : ; done
 
 # Wait for operator to be ready (3-5 minutes)
 oc wait --for=condition=Ready pod -l name=rhods-operator \

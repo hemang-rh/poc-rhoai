@@ -11,3 +11,10 @@ spec:
     disableTracking: false
     genAiStudio: true
     modelAsService: true
+    hardwareProfileOrder: []
+  notebookController:
+    enabled: true
+    notebookNamespace: rhods-notebooks
+    pvcSize: 10Gi
+  templateDisablement: []
+  templateOrder: []
