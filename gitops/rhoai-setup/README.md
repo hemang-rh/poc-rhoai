@@ -72,13 +72,26 @@ oc get route rhods-dashboard -n redhat-ods-applications
 
 ## Admin Configuration
 
+### Taint GPU node(s)
+
+```bash
+# Get all nvidia GPU nodes
+oc get nodes -l nvidia.com/gpu.present=true
+
+# Verify GPU node taints
+oc describe node <gpu-node> | grep -C 2 -i Taints:
+
+# Taint GPU nodes
+oc adm taint nodes <nvidia-gpu-node> nvidia.com/gpu=100:NoSchedule
+```
+
 ### Configure cluster settings
 
 ```bash
 until oc apply -k gitops/rhoai-setup/admin-configuration/cluster-settings; do : ; done
 ```
 
-### Configure logging
+### Configure logging (optional)
 
 ```bash
 until oc apply -k gitops/rhoai-setup/admin-configuration/configure-logging; do : ; done
