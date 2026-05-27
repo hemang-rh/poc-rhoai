@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: model-download-config
+  labels:
+    app.kubernetes.io/name: model-downloader
+data:
+  MODEL_ID: RedHatAI/Qwen3-8B-FP8-dynamic
+  REVISION: main
+  DOWNLOAD_DIR: /models
