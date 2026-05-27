@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: model-downloader
+  labels:
+    app.kubernetes.io/name: model-downloader
+spec:
+  restartPolicy: Never
+  securityContext:
+    fsGroup: 0
+    fsGroupChangePolicy: OnRootMismatch
+  containers:
+    - name: downloader
+      image: python:3.11-slim
+      imagePullPolicy: IfNotPresent
+      envFrom:
+        - configMapRef:
+            name: model-download-config
+        - secretRef:
+            name: hf-token-secret
+      command:
+        - /bin/bash
+        - -lc
+      args:
+        - |
+          set -euo pipefail
+          export HOME=/tmp
+          export HF_HOME=/tmp/huggingface
+          export PYTHON_DEPS=/tmp/python-deps
+          export PYTHONPATH="${PYTHON_DEPS}:${PYTHONPATH:-}"
+
+          python -m pip install --no-cache-dir --target "${PYTHON_DEPS}" 'huggingface_hub>=0.16.0' 'requests>=2.28.0' 'tqdm>=4.64.0'
+
+          python - <<'PY'
+          import os
+          import sys
+          import logging
+          from pathlib import Path
+          from huggingface_hub import snapshot_download
+          from huggingface_hub.utils import HfHubHTTPError
+
+          logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+          logger = logging.getLogger("model-downloader")
+
+          model_id = os.getenv("MODEL_ID", "").strip()
+          hf_token = os.getenv("HF_TOKEN", "").strip()
+          revision = os.getenv("REVISION", "main").strip() or "main"
+          download_dir = os.getenv("DOWNLOAD_DIR", "/models").strip() or "/models"
+
+          if not model_id:
+              logger.error("MODEL_ID environment variable is required")
+              sys.exit(1)
+
+          if not hf_token:
+              logger.error("HF_TOKEN environment variable is required")
+              sys.exit(1)
+
+          safe_name = model_id.replace('/', '_').replace('\\\\', '_')
+          model_path = Path(download_dir) / safe_name
+          model_path.mkdir(parents=True, exist_ok=True)
+
+          logger.info(f"Starting download of model: {model_id}")
+          logger.info(f"Revision: {revision}")
+          logger.info(f"Target directory: {model_path}")
+
+          try:
+              snapshot_download(
+                  repo_id=model_id,
+                  local_dir=str(model_path),
+                  token=hf_token,
+                  revision=revision,
+              )
+          except HfHubHTTPError as e:
+              code = getattr(getattr(e, "response", None), "status_code", "unknown")
+              logger.error(f"Hugging Face download failed with status {code}: {e}")
+              sys.exit(1)
+          except Exception as e:
+              logger.error(f"Unexpected download error: {e}")
+              sys.exit(1)
+
+          files = [f for f in model_path.rglob('*') if f.is_file()]
+          total_size = sum(f.stat().st_size for f in files)
+          logger.info(f"Download completed: {len(files)} files, {total_size / (1024 * 1024):.2f} MB")
+          PY
+      volumeMounts:
+        - name: model-storage
+          mountPath: /models
+      resources:
+        requests:
+          cpu: "1"
+          memory: 2Gi
+        limits:
+          cpu: "4"
+          memory: 8Gi
+  volumes:
+    - name: model-storage
+      persistentVolumeClaim:
+        claimName: model-download-pvc
