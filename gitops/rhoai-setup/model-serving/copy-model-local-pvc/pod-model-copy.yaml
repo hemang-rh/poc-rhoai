@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: model-copy-pod
+spec:
+  restartPolicy: Never
+  nodeSelector:
+    nvidia.com/gpu.present: "true"
+  tolerations:
+  - key: "nvidia.com/gpu"
+    operator: "Equal"
+    value: "100"
+    effect: "NoSchedule"
+  containers:
+  - name: model-copy
+  # In a disconnected environment, you cannot use tag. Rather you will have to use SHA digest. 
+    #For example, instead of using "registry.access.redhat.com/ubi9/ubi-minimal:latest", you would use "registry.access.redhat.com/ubi9/ubi-minimal@sha256:abc123..."
+    image: registry.access.redhat.com/ubi9/ubi:latest
+    command: ["sleep", "3600"]
+    volumeMounts:
+    - name: models
+      mountPath: /mnt/models
+  volumes:
+  - name: models
+    persistentVolumeClaim:
+      claimName: model-storage-pvc

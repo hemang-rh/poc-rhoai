@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: google-adk-agent
+  labels:
+    app.kubernetes.io/name: google-adk-agent
+    app.kubernetes.io/part-of: rhoai-demos

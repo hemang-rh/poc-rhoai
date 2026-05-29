@@ -1,0 +1,8 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: google-adk-agent
+  namespace: google-adk-agent
+  labels:
+    app.kubernetes.io/name: google-adk-agent
+    app.kubernetes.io/part-of: rhoai-demos

@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: google-adk-agent
+  namespace: google-adk-agent
+  labels:
+    app.kubernetes.io/name: google-adk-agent
+    app.kubernetes.io/part-of: rhoai-demos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: google-adk-agent
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: google-adk-agent
+        app.kubernetes.io/part-of: rhoai-demos
+    spec:
+      serviceAccountName: google-adk-agent
+      containers:
+        - name: agent
+          image: python:3.11-slim
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/bash
+            - -lc
+          args:
+            - |
+              set -euo pipefail
+              cd /opt/google-adk-agent
+              export HOME=/tmp
+              export PYTHON_DEPS=/tmp/python-deps
+              export PYTHONPATH="${PYTHON_DEPS}:${PYTHONPATH:-}"
+              python -m pip install --no-cache-dir --target "${PYTHON_DEPS}" -r requirements.txt
+              exec python -m uvicorn main:app --host 0.0.0.0 --port "${PORT:-8080}"
+          envFrom:
+            - configMapRef:
+                name: google-adk-agent-config
+            - secretRef:
+                name: google-adk-agent-secret
+          env:
+            - name: PYTHONDONTWRITEBYTECODE
+              value: "1"
+            - name: PYTHONUNBUFFERED
+              value: "1"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 2Gi
+          volumeMounts:
+            - name: source
+              mountPath: /opt/google-adk-agent
+              readOnly: true
+      volumes:
+        - name: source
+          configMap:
+            name: google-adk-agent-source

@@ -1,0 +1,158 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: google-adk-agent-source
+  namespace: google-adk-agent
+  labels:
+    app.kubernetes.io/name: google-adk-agent
+    app.kubernetes.io/part-of: rhoai-demos
+data:
+  Dockerfile: |
+    FROM python:3.11-slim
+
+    WORKDIR /opt/google-adk-agent
+
+    COPY requirements.txt .
+    RUN pip install --no-cache-dir -r requirements.txt
+
+    COPY . .
+
+    EXPOSE 8080
+
+    CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+  requirements.txt: |
+    google-adk>=1.0.0
+    litellm>=1.83.0
+    fastapi>=0.115.0
+    uvicorn[standard]>=0.30.0
+  agent.py: |
+    import os
+
+    from google.adk.agents import LlmAgent
+    from google.adk.models.lite_llm import LiteLlm
+
+
+    def create_agent() -> LlmAgent:
+        model_name = os.getenv("ADK_MODEL_NAME", "openai/gpt-oss-120b")
+        agent_name = os.getenv("AGENT_NAME", "gpt_oss_120b_agent")
+        description = os.getenv(
+            "AGENT_DESCRIPTION",
+            "Simple Google ADK agent backed by GPT OSS 120B on OpenShift AI.",
+        )
+        instruction = os.getenv(
+            "AGENT_INSTRUCTION",
+            "You are a concise and helpful assistant running on OpenShift AI.",
+        )
+
+        return LlmAgent(
+            model=LiteLlm(model=model_name),
+            name=agent_name,
+            description=description,
+            instruction=instruction,
+        )
+
+
+    root_agent = create_agent()
+  main.py: |
+    import os
+    import uuid
+    from typing import Any
+
+    from fastapi import FastAPI, HTTPException
+    from google.adk.runners import Runner
+    from google.adk.sessions import InMemorySessionService
+    from google.genai.types import Content, Part
+    from pydantic import BaseModel, Field
+
+    from agent import root_agent
+
+
+    APP_NAME = os.getenv("APP_NAME", "google-adk-agent")
+
+    app = FastAPI(title="Google ADK Agent", version="0.1.0")
+    session_service = InMemorySessionService()
+    runner = Runner(
+        agent=root_agent,
+        app_name=APP_NAME,
+        session_service=session_service,
+    )
+
+
+    class ChatRequest(BaseModel):
+        message: str = Field(..., min_length=1)
+        user_id: str = "default-user"
+        session_id: str | None = None
+
+
+    class ChatResponse(BaseModel):
+        response: str
+        user_id: str
+        session_id: str
+
+
+    @app.get("/healthz")
+    async def healthz() -> dict[str, str]:
+        return {"status": "ok"}
+
+
+    @app.get("/")
+    async def root() -> dict[str, Any]:
+        return {
+            "name": APP_NAME,
+            "agent": root_agent.name,
+            "model": os.getenv("ADK_MODEL_NAME", "openai/gpt-oss-120b"),
+            "endpoints": ["/healthz", "/chat"],
+        }
+
+
+    @app.post("/chat", response_model=ChatResponse)
+    async def chat(request: ChatRequest) -> ChatResponse:
+        session_id = request.session_id or str(uuid.uuid4())
+
+        try:
+            await _ensure_session(request.user_id, session_id)
+            message = Content(role="user", parts=[Part(text=request.message)])
+
+            final_parts: list[str] = []
+            async for event in runner.run_async(
+                user_id=request.user_id,
+                session_id=session_id,
+                new_message=message,
+            ):
+                if event.is_final_response() and event.content and event.content.parts:
+                    final_parts.extend(
+                        part.text
+                        for part in event.content.parts
+                        if getattr(part, "text", None)
+                    )
+
+            response = "\n".join(final_parts).strip()
+            if not response:
+                response = "The agent completed without returning text."
+
+            return ChatResponse(
+                response=response,
+                user_id=request.user_id,
+                session_id=session_id,
+            )
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+    async def _ensure_session(user_id: str, session_id: str) -> None:
+        try:
+            existing_session = await session_service.get_session(
+                app_name=APP_NAME,
+                user_id=user_id,
+                session_id=session_id,
+            )
+            if existing_session:
+                return
+        except Exception:
+            pass
+
+        await session_service.create_session(
+            app_name=APP_NAME,
+            user_id=user_id,
+            session_id=session_id,
+        )

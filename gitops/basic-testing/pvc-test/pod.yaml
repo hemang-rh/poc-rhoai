@@ -8,7 +8,8 @@ spec:
   restartPolicy: Always
   containers:
     - name: test-container
-      image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+    # In a disconnected environment, you cannot use tag. Rather you will have to use SHA digest. 
+    #For example, instead of using "registry.access.redhat.com/ubi9/ubi-minimal:latest", you would use "registry.access.redhat.com/ubi9/ubi-minimal@sha256:abc123...". 
       command:
         - /bin/sh
         - -c

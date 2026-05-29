@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: google-adk-agent-config
+  namespace: google-adk-agent
+  labels:
+    app.kubernetes.io/name: google-adk-agent
+    app.kubernetes.io/part-of: rhoai-demos
+data:
+  APP_NAME: google-adk-agent
+  AGENT_NAME: llama_3_1_agent
+  AGENT_DESCRIPTION: Simple Google ADK agent backed by Red Hat AI LLaMA 3.1 8B on OpenShift AI.
+  AGENT_INSTRUCTION: |
+    You are a concise and helpful assistant running on OpenShift AI.
+    Answer directly, ask a clarifying question when needed, and do not invent cluster details.
+  ADK_MODEL_NAME: openai/redhataillama-31-8b-instruct
+  OPENAI_API_BASE: http://redhataillama-31-8b-instruct-predictor.demo-modelserving.svc.cluster.local:8080/v1
+  PORT: "8080"

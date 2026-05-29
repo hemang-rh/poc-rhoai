@@ -1,0 +1,46 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: guidellm
+  labels:
+    app: guidellm
+spec:
+  template:
+    metadata:
+      labels:
+        app: guidellm
+    spec:
+      restartPolicy: Never
+      securityContext: {}
+      containers:
+      - name: guidellm
+        image: quay.io/rh-aiservices-bu/guidellm:f1f8ca8
+        env:
+        - name: GUIDELLM_TARGET
+          value: "http://redhataillama-31-8b-instruct-predictor.demo-modelserving.svc.cluster.local:8080/v1"
+        - name: GUIDELLM_MODEL
+          value: "redhataillama-31-8b-instruct"
+        - name: GUIDELLM_RATE_TYPE
+          value: "sweep"
+        - name: GUIDELLM_DATA
+          value: "prompt_tokens=256,output_tokens=128"
+        - name: GUIDELLM_MAX_REQUESTS
+          value: "100"
+        - name: GUIDELLM_MAX_SECONDS
+          value: "30"
+        - name: GUIDELLM_OUTPUT_PATH
+          value: "/results/results.json"
+        - name: GUIDELLM_PROCESSOR
+          value: "/mnt/tokenizer"
+        volumeMounts:
+        - name: results
+          mountPath: /results
+        - name: tokenizer-pvc
+          mountPath: /mnt/tokenizer
+      volumes:
+      - name: results
+        persistentVolumeClaim:
+          claimName: guidellm-results-pvc
+      - name: tokenizer-pvc
+        persistentVolumeClaim:
+          claimName: model-tokenizer-pvc
