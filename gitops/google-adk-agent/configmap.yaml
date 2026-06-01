@@ -7,6 +7,7 @@ metadata:
     app.kubernetes.io/name: google-adk-agent
     app.kubernetes.io/part-of: rhoai-demos
 data:
+  # Make changes to below variable to match your configuration.
   APP_NAME: google-adk-agent
   AGENT_NAME: llama_3_1_agent
   AGENT_DESCRIPTION: Simple Google ADK agent backed by Red Hat AI LLaMA 3.1 8B on OpenShift AI.
