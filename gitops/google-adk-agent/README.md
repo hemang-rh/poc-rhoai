@@ -15,18 +15,36 @@ Edit `configmap.yaml` if your served model name or endpoint differs:
 If your endpoint requires authentication, set `OPENAI_API_KEY` in
 `secret.example.yaml`.
 
+## Build and Push the Image
+
+```bash
+podman build --platform linux/amd64 \
+  -t quay.io/rh-ee-hshishir/google-adk-agent:2.0 \
+  gitops/google-adk-agent/app
+
+podman login quay.io
+podman push quay.io/rh-ee-hshishir/google-adk-agent:2.0
+```
+
+Update `deployment.yaml` if you use a different Quay repository or tag.
+If the cluster cannot pull from Quay, mirror this image into a registry
+the cluster can access and use that mirrored image reference instead.
+
+If the pod fails with `Exec format error`, confirm the node architecture and
+rebuild for that platform:
+
+```bash
+oc get nodes -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.status.nodeInfo.architecture}{"\n"}{end}'
+```
+
 ## Deploy
 
 ```bash
 oc apply -k gitops/google-adk-agent
 ```
 
-The default deployment runs the Python source directly from
-`source-configmap.yaml` so the app can be created with `oc apply` only.
-
-If you apply individual files instead of using Kustomize, create the namespace,
-`configmap.yaml`, `source-configmap.yaml`, and `secret.example.yaml` before
-`deployment.yaml`.
+The deployment uses the prebuilt image, so the OpenShift pod does not need
+internet access to run `pip install`.
 
 ## Making changes and redeploying
 

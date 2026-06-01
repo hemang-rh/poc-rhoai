@@ -20,20 +20,8 @@ spec:
       serviceAccountName: google-adk-agent
       containers:
         - name: agent
-          image: python:3.11-slim
+          image: quay.io/rh-ee-hshishir/google-adk-agent:2.0
           imagePullPolicy: IfNotPresent
-          command:
-            - /bin/bash
-            - -lc
-          args:
-            - |
-              set -euo pipefail
-              cd /opt/google-adk-agent
-              export HOME=/tmp
-              export PYTHON_DEPS=/tmp/python-deps
-              export PYTHONPATH="${PYTHON_DEPS}:${PYTHONPATH:-}"
-              python -m pip install --no-cache-dir --target "${PYTHON_DEPS}" -r requirements.txt
-              exec python -m uvicorn main:app --host 0.0.0.0 --port "${PORT:-8080}"
           envFrom:
             - configMapRef:
                 name: google-adk-agent-config
@@ -67,11 +55,3 @@ spec:
             limits:
               cpu: "1"
               memory: 2Gi
-          volumeMounts:
-            - name: source
-              mountPath: /opt/google-adk-agent
-              readOnly: true
-      volumes:
-        - name: source
-          configMap:
-            name: google-adk-agent-source
