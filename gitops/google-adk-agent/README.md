@@ -19,11 +19,11 @@ If your endpoint requires authentication, set `OPENAI_API_KEY` in
 
 ```bash
 podman build --platform linux/amd64 \
-  -t quay.io/rh-ee-hshishir/app:0.1.0 \
+  -t quay.io/rh-ee-hshishir/google-adk-agent:2.0 \
   gitops/google-adk-agent/app
 
 podman login quay.io
-podman push quay.io/rh-ee-hshishir/app:0.1.0
+podman push quay.io/rh-ee-hshishir/google-adk-agent:2.0
 ```
 
 Update `deployment.yaml` if you use a different Quay repository or tag.

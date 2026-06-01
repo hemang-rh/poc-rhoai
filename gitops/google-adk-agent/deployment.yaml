@@ -20,7 +20,7 @@ spec:
       serviceAccountName: google-adk-agent
       containers:
         - name: agent
-          image: quay.io/rh-ee-hshishir/app:0.1.0
+          image: quay.io/rh-ee-hshishir/google-adk-agent:2.0
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
