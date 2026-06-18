@@ -1,0 +1,50 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  annotations:
+    modelFormat: vLLM
+    opendatahub.io/genai-use-case: chatbot
+    opendatahub.io/hardware-profile-name: profile-nvidia-gpu-full
+    opendatahub.io/hardware-profile-namespace: redhat-ods-applications
+    opendatahub.io/model-type: generative
+    openshift.io/description: ""
+    openshift.io/display-name: Llama-3.1-8B-Instruct
+    security.opendatahub.io/enable-auth: "false"
+    serving.kserve.io/deploymentMode: Standard
+    serving.kserve.io/stop: "false"
+  labels:
+    networking.kserve.io/visibility: exposed
+    opendatahub.io/dashboard: "true"
+    opendatahub.io/genai-asset: "true"
+  name: llama-31-8b-instruct
+  namespace: demo-modelserving
+spec:
+  predictor:
+    automountServiceAccountToken: false
+    deploymentStrategy:
+      type: RollingUpdate
+    maxReplicas: 1
+    minReplicas: 1
+    model:
+      args:
+      - --max-model-len=30000
+      modelFormat:
+        name: vLLM
+      name: ""
+      resources:
+        limits:
+          cpu: "12"
+          memory: 32Gi
+          nvidia.com/gpu: "1"
+        requests:
+          cpu: "8"
+          memory: 16Gi
+          nvidia.com/gpu: "1"
+      runtime: llama-31-8b-instruct
+      storageUri: oci://registry.redhat.io/rhelai1/modelcar-llama-3-1-8b-instruct:1.5
+    timeout: 30
+    tolerations:
+    - effect: NoSchedule
+      key: nvidia.com/gpu
+      operator: Equal
+      value: "100"
