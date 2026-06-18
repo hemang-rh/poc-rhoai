@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: google-adk-agent-files
+  namespace: google-adk-agent
+  labels:
+    app.kubernetes.io/name: google-adk-agent
+    app.kubernetes.io/part-of: rhoai-demos
+data:
+  agent-settings.yaml: |
+    max_turns: 10
+    stream: true
+    log_level: INFO
+  system-prompt.txt: |
+    You are a concise and helpful assistant running on OpenShift AI.
+    Answer directly, ask a clarifying question when needed,
+    and do not invent cluster details.
+  model-config.yaml: |
+    temperature: 0.7
+    max_tokens: 1024
+    top_p: 0.95

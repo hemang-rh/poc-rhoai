@@ -18,6 +18,10 @@ spec:
         app.kubernetes.io/part-of: rhoai-demos
     spec:
       serviceAccountName: google-adk-agent
+      volumes:
+        - name: agent-config-files
+          configMap:
+            name: google-adk-agent-files
       containers:
         - name: agent
           image: quay.io/rh-ee-hshishir/google-adk-agent:2.0
@@ -48,6 +52,10 @@ spec:
               port: http
             initialDelaySeconds: 30
             periodSeconds: 30
+          volumeMounts:
+            - name: agent-config-files
+              mountPath: /etc/agent-config
+              readOnly: true
           resources:
             requests:
               cpu: 250m
