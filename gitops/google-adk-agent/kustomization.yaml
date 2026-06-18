@@ -7,6 +7,7 @@ resources:
   - namespace.yaml
   - serviceaccount.yaml
   - configmap.yaml
+  - configmap-agent-files.yaml
   - secret.example.yaml
   - deployment.yaml
   - service.yaml
