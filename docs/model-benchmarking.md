@@ -2,7 +2,7 @@
 
 ## What is GuideLLM?
 
-GuideLLM is an open-source benchmarking toolkit from Red Hat designed to evaluate the performance of Large Language Model (LLM) deployments under realistic workloads. It helps organizations understand how models perform before production by measuring throughput, latency, concurrency, and resource requirements. [[GuideLLM:...Developer]](https://developers.redhat.com/articles/2025/06/20/guidellm-evaluate-llm-deployments-real-world-inference#)
+GuideLLM is an open-source benchmarking toolkit from Red Hat designed to evaluate the performance of Large Language Model (LLM) deployments under realistic workloads. It helps organizations understand how models perform before production by measuring throughput, latency, concurrency, and resource requirements.
 
 ### Why it matters
 

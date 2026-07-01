@@ -1,6 +1,6 @@
 # **OpenShift AI: Hardware Profiles Guide**
 
-**1. Overview of Hardware Profiles:** Hardware profiles are custom resources (CRs) designed for targeted scheduling \***\*within Red Hat OpenShift AI. Introduced in OpenShift AI 3.0, they provide a flexible, consistent way to define compute configurations for AI workloads, completely **replacing the legacy Accelerator Profiles and Container Size selectors\*\*.
+**1. Overview of Hardware Profiles:** Hardware profiles are custom resources (CRs) designed for targeted scheduling within Red Hat OpenShift AI. Introduced in OpenShift AI 3.0, they provide a flexible, consistent way to define compute configurations for AI workloads, completely **replacing the legacy Accelerator Profiles and Container Size selectors**.
 
 By using hardware profiles, administrators can manage and allocate specific compute resources—such as hardware accelerators (like NVIDIA/AMD GPUs, Intel Gaudi, or IBM Spyre), specialized memory, or CPU-only nodes—specifically tailored for model serving and workbenches.
 
